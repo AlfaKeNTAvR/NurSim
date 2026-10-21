@@ -38,12 +38,20 @@ public static class QuestBuild
         "MetaQuestTouchPlusControllerProfile",
     };
 
+    // Shaders loaded with Shader.Find at runtime; a build strips them unless
+    // they are in Graphics Settings > Always Included Shaders.
+    static readonly string[] RuntimeFoundShaders =
+    {
+        "Custom/URPPointCloud",
+    };
+
     [MenuItem("NurSim/Quest/Configure Android")]
     public static void ConfigureAndroid()
     {
         ConfigurePlayerSettings();
         ConfigureXRLoader();
         ConfigureOpenXRFeatures();
+        IncludeRuntimeFoundShaders();
         AssetDatabase.SaveAssets();
         Debug.Log("[QuestBuild] Android settings configured.");
     }
@@ -135,6 +143,31 @@ public static class QuestBuild
         EditorUtility.SetDirty(perTarget);
         EditorUtility.SetDirty(androidSettings);
         EditorUtility.SetDirty(manager);
+    }
+
+    static void IncludeRuntimeFoundShaders()
+    {
+        var graphicsSettings = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.GraphicsSettings>("ProjectSettings/GraphicsSettings.asset");
+        var serialized = new SerializedObject(graphicsSettings);
+        SerializedProperty included = serialized.FindProperty("m_AlwaysIncludedShaders");
+
+        foreach (string shaderName in RuntimeFoundShaders)
+        {
+            Shader shader = Shader.Find(shaderName);
+            if (shader == null)
+                throw new Exception($"[QuestBuild] Shader {shaderName} not found.");
+
+            bool present = false;
+            for (int i = 0; i < included.arraySize; i++)
+                present |= included.GetArrayElementAtIndex(i).objectReferenceValue == shader;
+            if (present)
+                continue;
+
+            included.InsertArrayElementAtIndex(included.arraySize);
+            included.GetArrayElementAtIndex(included.arraySize - 1).objectReferenceValue = shader;
+            Debug.Log($"[QuestBuild] Added {shaderName} to Always Included Shaders.");
+        }
+        serialized.ApplyModifiedProperties();
     }
 
     static void ConfigureOpenXRFeatures()

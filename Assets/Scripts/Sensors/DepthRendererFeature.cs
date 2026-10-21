@@ -58,7 +58,16 @@ public class DepthRendererFeature : ScriptableRendererFeature
     public override void Create() 
     {
         // Get a depth render pass
-        var material = new Material(Shader.Find("Custom/DepthShader"));
+        Shader shader = Shader.Find("Custom/DepthShader");
+        // Builds without the simulated depth camera (Quest teleop) strip this
+        // shader; a null shader would throw and break the whole URP renderer.
+        if (shader == null)
+        {
+            Debug.LogWarning("DepthRendererFeature: Custom/DepthShader not found, depth capture disabled.");
+            renderPass = null;
+            return;
+        }
+        var material = new Material(shader);
         renderPass = new DepthRenderPass(material);
     }
 
@@ -68,7 +77,7 @@ public class DepthRendererFeature : ScriptableRendererFeature
     ) 
     {
         // Only apply to "DepthCamera"
-        if (renderingData.cameraData.camera.tag == "DepthCamera")
+        if (renderPass != null && renderingData.cameraData.camera.tag == "DepthCamera")
         {
             renderer.EnqueuePass(renderPass);
         }
@@ -79,7 +88,7 @@ public class DepthRendererFeature : ScriptableRendererFeature
     )
     {
         // Only apply to "DepthCamera"
-        if (renderingData.cameraData.camera.tag == "DepthCamera")
+        if (renderPass != null && renderingData.cameraData.camera.tag == "DepthCamera")
         {
             renderPass.SetTarget(renderer.cameraColorTargetHandle);
         }
