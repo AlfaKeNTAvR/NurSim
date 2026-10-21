@@ -23,6 +23,14 @@ public class TrackerPoseBinder : MonoBehaviour
 
     void Awake()
     {
+        // The Vive Ultimate Tracker does not exist on Quest; publishing would
+        // send a frozen pose on /tracker_pose.
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            enabled = false;
+            return;
+        }
+
         // Setup ROS
         ros = ROSConnection.GetOrCreateInstance();
         ros.RegisterPublisher<PoseMsg>(rosTopicName);
