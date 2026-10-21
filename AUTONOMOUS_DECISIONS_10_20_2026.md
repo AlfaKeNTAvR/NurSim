@@ -33,3 +33,11 @@ Branch `nikita/feat/quest-standalone-teleop`, worktree `.claude/worktrees/quest`
 - Only one receiver gets camera frames: whichever app published `unity/ip` last (PC or Quest). Running both at once steals the stream. OK?
 
 - Local main is 16 commits behind origin/main (dsaliba/NurSim). Rebase the Quest branch onto it later?
+
+## Outcome (2026-10-21 ~01:50 local)
+
+- Build 7 installed on the Quest 3 and working end to end with iona2 over GlobalProtect: ROS, controls, neck camera 30 fps (6 ms decode), 72 fps app. Pushed to github.com/AlfaKeNTAvR/NurSim, branch nikita/feat/quest-standalone-teleop.
+- Fixed on device: black screen (simulation depth renderer feature threw without its stripped shader), point cloud shader missing in builds, first unity/ip publish lost before ROS connected (now republished every 3 s), interface freeze when another client connected to the robot's public port 10000 (now reconnects after 5 s of silence; root fix is a robot firewall, HIR-111).
+- Robot web panel (HIR-112) running on iona2 port 8090, key-protected; source copied to Tools/robot_panel/. Autostart was blocked by Claude Code's safety check: start it after a reboot by hand.
+- Tools/quest/: batchmode build (shares the vr-fencing Unity lock), USB install + launch, logcat and network helpers.
+- Linear: HIR-103 parent; done HIR-104/105/106/107/110; open HIR-108 (in-VR host entry), HIR-109 (rebase onto origin/main), HIR-111 (firewall), HIR-112 (panel autostart), HIR-113 (left arm narrow preset, diagnosis running), HIR-114 (GL error spam, off-thread decode).
