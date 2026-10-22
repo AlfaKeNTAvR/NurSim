@@ -62,13 +62,13 @@ LAUNCHES = [
     ),
 ]
 
-# key, label, rosservice call arguments, ask for confirmation
+# key, label, rosservice call arguments, ask for confirmation (breakers only)
 SERVICES = [
-    ("aux1_on", "Aux 1 ON", '/aux_breaker_1 "enable: true"', False),
+    ("aux1_on", "Aux 1 ON", '/aux_breaker_1 "enable: true"', True),
     ("aux1_off", "Aux 1 OFF", '/aux_breaker_1 "enable: false"', True),
     ("base_on", "Base breaker ON", "/base_breaker true", True),
     ("base_off", "Base breaker OFF", "/base_breaker false", True),
-    ("torso_home", "Torso home", '/chest_control/home "{}"', True),
+    ("torso_home", "Torso home", '/chest_control/home "{}"', False),
 ]
 
 last_results = {}
@@ -204,7 +204,7 @@ def render_page():
         f'<div class="row"><span class="name"><span id="dot-{key}" class="dot"></span>{html.escape(label)}'
         f' <small id="state-{key}"></small></span>'
         f"<button class=\"start\" onclick=\"post('/start/{key}', 'Start {html.escape(label)}', false)\">Start</button>"
-        f"<button class=\"stop\" onclick=\"post('/stop/{key}', 'Stop {html.escape(label)}', true)\">Stop</button>"
+        f"<button class=\"stop\" onclick=\"post('/stop/{key}', 'Stop {html.escape(label)}', false)\">Stop</button>"
         f'<button class="log" onclick="showLog(\'{key}\')">Log</button></div>'
         for key, label, _ in LAUNCHES
     )
